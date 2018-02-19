@@ -1,8 +1,77 @@
+def String getValuesAfterSubstring(String str, String subStr) {
+    int startPosition = str.lastIndexOf(subStr)
+    
+    if (startPosition == -1) {
+      return "failed";
+    }
+    
+    int finalPosition = startPosition + subStr.length()
+    
+    if (finalPosition >= str.length())
+      return "failed";
+
+    return str.substring(finalPosition)
+} 
+
+def boolean checkSlaveBuilt(String slaveName) {
+    def slaveFullName = "jenkins-slave-" + slaveName
+    def slaveDescription = sh(returnStdout: true, 
+                              script: """#!/bin/bash
+                                  oc describe is ${slaveFullName} | awk 'NR > 1 {print \$2}'
+                              """
+                            )
+    def uniqueImages = getValuesAfterSubstring(slaveDescription, "Images:").split()
+    def numOfImages = Integer.parseInt(uniqueImages[0])
+    
+    return numOfImages >= 1
+}
+
+def boolean checkSlaveKubernetes(String slaveName) {
+    def slaveFullName = "jenkins-slave-" + slaveName
+    try {
+        def availablePodTemplates = jenkins.model.Jenkins.instance.clouds[0].getTemplates()
+        for (pod in availablePodTemplates) {
+            def podName = pod.name
+            if (podName.equalsIgnoreCase(slaveFullName))
+                return true
+        }
+    }
+    catch (e) {
+      println(e)
+    }
+  
+    return false
+}
+
+def boolean checkSlaveCommand(String slaveName, String command) {
+    def slaveFullName = "jenkins-slave-" + slaveName
+    node(slaveFullName) {
+      sh "${command}"
+    }
+
+    return true
+}
+
+def testSlave(String slaveName, String command) {
+    if(!checkSlaveBuilt(slaveName))
+        echo 'The ansible slave image could not be built'
+           
+    if(!checkSlaveKubernetes(slaveName))
+        echo 'The ansible slave image not available'
+      
+    if(!checkSlaveCommand(slaveName, command))
+        echo 'Ansible slave image version incorrect'
+}
+
 node() {
     try {
         stage('Initialization') {
             env.OCP_API_SERVER = "${env.OPENSHIFT_API_URL}"
             env.OCP_TOKEN = readFile('/var/run/secrets/kubernetes.io/serviceaccount/token').trim()
+        }
+
+        stage('Test Slave') {
+            testSlave("ansible", "ansible --version")
         }
 
         node('jenkins-slave-ansible') {

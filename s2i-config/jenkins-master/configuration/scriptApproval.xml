@@ -5,6 +5,10 @@
     <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods drop java.lang.CharSequence int</string>
     <string>staticMethod org.codehaus.groovy.runtime.DefaultGroovyMethods reverse java.lang.String</string>
     <string>method hudson.plugins.git.GitSCM getUserRemoteConfigs</string>
+    <string>staticMethod jenkins.model.Jenkins getInstance</string>
+    <string>field jenkins.model.Jenkins clouds</string>
+    <string>method org.csanchez.jenkins.plugins.kubernetes.KubernetesCloud getTemplates</string>
+    <string>method org.csanchez.jenkins.plugins.kubernetes.PodTemplate getName</string>
   </approvedSignatures>
   <aclApprovedSignatures/>
   <approvedClasspathEntries/>
