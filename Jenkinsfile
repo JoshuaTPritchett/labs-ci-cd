@@ -2,13 +2,13 @@ def String getValuesAfterSubstring(String str, String subStr) {
     int startPosition = str.lastIndexOf(subStr)
     
     if (startPosition == -1) {
-      return "failed";
+      return "0";
     }
     
     int finalPosition = startPosition + subStr.length()
     
     if (finalPosition >= str.length())
-      return "failed";
+      return "0";
 
     return str.substring(finalPosition)
 } 
